@@ -5,10 +5,10 @@ import BooksGrid from "./BooksGrid";
 
 class BooksApp extends React.Component {
   state = {
-    books: [],
     currentlyReading: [],
     wantToRead: [],
     read: [],
+    none: [],
     /**
      * TODO: Instead of using this state variable to keep track of which page
      * we're on, use the URL in the browser's address bar. This will ensure that
@@ -20,18 +20,33 @@ class BooksApp extends React.Component {
 
   componentDidMount() {
     BooksAPI.getAll().then(books => {
-      this.setState({ books })
-      this.setState({ currentlyReading: books.filter(b => b.shelf === 'currentlyReading') })
-      this.setState({ wantToRead: books.filter(b => b.shelf === 'wantToRead') })
-      this.setState({ read: books.filter(b => b.shelf === 'read') })
+      this.setState((prevState) => {
+        books.forEach(b => {
+          // TODO: 
+          prevState[b.shelf].push(b)
+        });
+      })
     })
   }
 
-  moveBook = (book) => {
+  handleMoveBookEvent = (book, e) => {
+    const fromShelf = book.shelf
+    const toShelf = e.target.value
+    if (fromShelf === toShelf)
+      return
 
+    this.setState((prevState) => {
+      return {
+        [fromShelf]: prevState[fromShelf].filter(b => b.id !== book.id),
+        [toShelf]: prevState[toShelf].concat([book])
+      }
+    })
+
+    BooksAPI.update(book, e.target.value)
   }
 
   render() {
+    console.log(this.state.displayingBooks)
     return (
       <div className="app">
         {this.state.showSearchPage ? (
@@ -65,19 +80,19 @@ class BooksApp extends React.Component {
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Currently Reading</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.currentlyReading} onChangeBookShelf={this.moveBook} />
+                      <BooksGrid books={this.state.currentlyReading} onChangeBookShelf={this.handleMoveBookEvent} />
                     </div>
                   </div>
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Want to Read</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.wantToRead} onChangeBookShelf={this.moveBook} />
+                      <BooksGrid books={this.state.wantToRead} onChangeBookShelf={this.handleMoveBookEvent} />
                     </div>
                   </div>
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Read</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.read} onChangeBookShelf={this.moveBook} />
+                      <BooksGrid books={this.state.read} onChangeBookShelf={this.handleMoveBookEvent} />
                     </div>
                   </div>
                 </div>
