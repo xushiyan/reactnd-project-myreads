@@ -29,13 +29,14 @@ class BooksApp extends React.Component {
     })
   }
 
-  handleMoveBookEvent = (book, e) => {
+  handleChangeShelfEvent = (book, e) => {
     const fromShelf = book.shelf
     const toShelf = e.target.value
     if (fromShelf === toShelf)
       return
 
     this.setState((prevState) => {
+      book.shelf = toShelf
       return {
         [fromShelf]: prevState[fromShelf].filter(b => b.id !== book.id),
         [toShelf]: prevState[toShelf].concat([book])
@@ -80,19 +81,19 @@ class BooksApp extends React.Component {
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Currently Reading</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.currentlyReading} onChangeBookShelf={this.handleMoveBookEvent} />
+                      <BooksGrid books={this.state.currentlyReading} onChangeBookShelf={this.handleChangeShelfEvent} />
                     </div>
                   </div>
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Want to Read</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.wantToRead} onChangeBookShelf={this.handleMoveBookEvent} />
+                      <BooksGrid books={this.state.wantToRead} onChangeBookShelf={this.handleChangeShelfEvent} />
                     </div>
                   </div>
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Read</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.read} onChangeBookShelf={this.handleMoveBookEvent} />
+                      <BooksGrid books={this.state.read} onChangeBookShelf={this.handleChangeShelfEvent} />
                     </div>
                   </div>
                 </div>
