@@ -1,4 +1,5 @@
 import React from 'react'
+import { Route, Link } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
 import BooksGrid from "./BooksGrid"
@@ -8,13 +9,6 @@ import SearchBar from "./SearchBar"
 class BooksApp extends React.Component {
   state = {
     mybooks: new Map(),
-    /**
-     * TODO: Instead of using this state variable to keep track of which page
-     * we're on, use the URL in the browser's address bar. This will ensure that
-     * users can use the browser's back and forward buttons to navigate between
-     * pages, as well as provide a good URL they can bookmark and share.
-     */
-    showSearchPage: false,
     searchResults: []
   }
 
@@ -55,10 +49,10 @@ class BooksApp extends React.Component {
   render() {
     return (
       <div className="app">
-        {this.state.showSearchPage ? (
+        <Route path='/search' render={() => (
           <div className="search-books">
             <div className="search-books-bar">
-              <a className="close-search" onClick={() => this.setState({ showSearchPage: false, searchResults: [] })}>Close</a>
+              <Link to="/" className="close-search" onClick={() => this.setState({ searchResults: [] })}>Close</Link>
               <div className="search-books-input-wrapper">
                 <SearchBar onReturnSearchResults={this.handleSearchResultsUpdate} />
               </div>
@@ -69,41 +63,42 @@ class BooksApp extends React.Component {
               </div>
             </div>
           </div>
-        ) : (
-            <div className="list-books">
-              <div className="list-books-title">
-                <h1>MyReads</h1>
-              </div>
-              <div className="list-books-content">
-                <div>
-                  <div className="bookshelf">
-                    <h2 className="bookshelf-title">Currently Reading</h2>
-                    <div className="bookshelf-books">
-                      <BooksGrid books={Array.from(this.state.mybooks.values()).filter(b => b.shelf === 'currentlyReading')}
-                        onChangeBookShelf={this.handleShelfChangeEvent} />
-                    </div>
+        )} />
+        <Route exact path='/' render={() => (
+          <div className="list-books">
+            <div className="list-books-title">
+              <h1>MyReads</h1>
+            </div>
+            <div className="list-books-content">
+              <div>
+                <div className="bookshelf">
+                  <h2 className="bookshelf-title">Currently Reading</h2>
+                  <div className="bookshelf-books">
+                    <BooksGrid books={Array.from(this.state.mybooks.values()).filter(b => b.shelf === 'currentlyReading')}
+                      onChangeBookShelf={this.handleShelfChangeEvent} />
                   </div>
-                  <div className="bookshelf">
-                    <h2 className="bookshelf-title">Want to Read</h2>
-                    <div className="bookshelf-books">
-                      <BooksGrid books={Array.from(this.state.mybooks.values()).filter(b => b.shelf === 'wantToRead')}
-                        onChangeBookShelf={this.handleShelfChangeEvent} />
-                    </div>
+                </div>
+                <div className="bookshelf">
+                  <h2 className="bookshelf-title">Want to Read</h2>
+                  <div className="bookshelf-books">
+                    <BooksGrid books={Array.from(this.state.mybooks.values()).filter(b => b.shelf === 'wantToRead')}
+                      onChangeBookShelf={this.handleShelfChangeEvent} />
                   </div>
-                  <div className="bookshelf">
-                    <h2 className="bookshelf-title">Read</h2>
-                    <div className="bookshelf-books">
-                      <BooksGrid books={Array.from(this.state.mybooks.values()).filter(b => b.shelf === 'read')}
-                        onChangeBookShelf={this.handleShelfChangeEvent} />
-                    </div>
+                </div>
+                <div className="bookshelf">
+                  <h2 className="bookshelf-title">Read</h2>
+                  <div className="bookshelf-books">
+                    <BooksGrid books={Array.from(this.state.mybooks.values()).filter(b => b.shelf === 'read')}
+                      onChangeBookShelf={this.handleShelfChangeEvent} />
                   </div>
                 </div>
               </div>
-              <div className="open-search">
-                <a onClick={() => this.setState({ showSearchPage: true })}>Add a book</a>
-              </div>
             </div>
-          )}
+            <div className="open-search">
+              <Link to='/search'>Add a book</Link>
+            </div>
+          </div>
+        )} />
       </div>
     )
   }
