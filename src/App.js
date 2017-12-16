@@ -7,10 +7,7 @@ import SearchBar from "./SearchBar"
 
 class BooksApp extends React.Component {
   state = {
-    currentlyReading: [],
-    wantToRead: [],
-    read: [],
-    none: [],
+    mybooks: new Map(),
     /**
      * TODO: Instead of using this state variable to keep track of which page
      * we're on, use the URL in the browser's address bar. This will ensure that
@@ -23,56 +20,53 @@ class BooksApp extends React.Component {
 
   componentDidMount() {
     BooksAPI.getAll().then(books => {
-      this.setState((prevState) => {
-        books.forEach(b => {
-          // TODO: 
-          prevState[b.shelf].push(b)
-        });
-      })
+      const mybooks = new Map(books.map((b) => [b.id, b]))
+      this.setState({ mybooks })
     })
   }
 
   handleShelfChangeEvent = (book, e) => {
-    const fromShelf = book.shelf
+    const fromShelf = book.shelf || 'none'
     const toShelf = e.target.value
     if (fromShelf === toShelf)
       return
 
-    book.shelf = toShelf
-
     this.setState((prevState) => {
-      return {
-        [fromShelf]: prevState[fromShelf].filter(b => b.id !== book.id),
-        [toShelf]: prevState[toShelf].concat([book])
-      }
+      book.shelf = toShelf
+      const mybooks = prevState.mybooks
+      mybooks.set(book.id, book)
+      return { mybooks }
     })
 
-    BooksAPI.update(book, e.target.value)
+    BooksAPI.update(book, toShelf)
   }
 
   handleSearchResultsUpdate = (books) => {
-    this.setState({
-      searchResults: books
+    this.setState((prevState) => {
+      const mybooks = prevState.mybooks
+      books.forEach(b => {
+        if (mybooks.has(b.id))
+          b.shelf = mybooks.get(b.id).shelf
+      });
+      return { searchResults: books }
     })
   }
 
   render() {
-    console.log(this.state.searchResults)
     return (
       <div className="app">
         {this.state.showSearchPage ? (
           <div className="search-books">
             <div className="search-books-bar">
-              <a className="close-search" onClick={() => this.setState({ showSearchPage: false })}>Close</a>
+              <a className="close-search" onClick={() => this.setState({ showSearchPage: false, searchResults: [] })}>Close</a>
               <div className="search-books-input-wrapper">
                 <SearchBar onReturnSearchResults={this.handleSearchResultsUpdate} />
-                <div className="bookshelf-books">
-                  <BooksGrid books={this.state.searchResults} onChangeBookShelf={this.handleShelfChangeEvent} />
-                </div>
               </div>
             </div>
             <div className="search-books-results">
-              <ol className="books-grid"></ol>
+              <div className="bookshelf-books">
+                <BooksGrid books={this.state.searchResults} onChangeBookShelf={this.handleShelfChangeEvent} />
+              </div>
             </div>
           </div>
         ) : (
@@ -85,19 +79,22 @@ class BooksApp extends React.Component {
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Currently Reading</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.currentlyReading} onChangeBookShelf={this.handleShelfChangeEvent} />
+                      <BooksGrid books={Array.from(this.state.mybooks.values()).filter(b => b.shelf === 'currentlyReading')}
+                        onChangeBookShelf={this.handleShelfChangeEvent} />
                     </div>
                   </div>
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Want to Read</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.wantToRead} onChangeBookShelf={this.handleShelfChangeEvent} />
+                      <BooksGrid books={Array.from(this.state.mybooks.values()).filter(b => b.shelf === 'wantToRead')}
+                        onChangeBookShelf={this.handleShelfChangeEvent} />
                     </div>
                   </div>
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Read</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.read} onChangeBookShelf={this.handleShelfChangeEvent} />
+                      <BooksGrid books={Array.from(this.state.mybooks.values()).filter(b => b.shelf === 'read')}
+                        onChangeBookShelf={this.handleShelfChangeEvent} />
                     </div>
                   </div>
                 </div>

@@ -20,8 +20,8 @@ class BooksGrid extends Component {
                             <div className="book-top">
                                 <div className="book-cover" style={{ width: 128, height: 188, backgroundImage: `url(${book.imageLinks.smallThumbnail})` }}></div>
                                 <div className="book-shelf-changer">
-                                    <select value={book.shelf} onChange={onChangeBookShelf.bind(this, book)}>
-                                        <option value="none" disabled>Move to...</option>
+                                    <select value={book.shelf || 'none'} onChange={onChangeBookShelf.bind(this, book)}>
+                                        <option disabled>Move to...</option>
                                         <option value="currentlyReading">Currently Reading</option>
                                         <option value="wantToRead">Want to Read</option>
                                         <option value="read">Read</option>
