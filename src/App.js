@@ -1,7 +1,9 @@
 import React from 'react'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
-import BooksGrid from "./BooksGrid";
+import BooksGrid from "./BooksGrid"
+import SearchBar from "./SearchBar"
+
 
 class BooksApp extends React.Component {
   state = {
@@ -15,7 +17,8 @@ class BooksApp extends React.Component {
      * users can use the browser's back and forward buttons to navigate between
      * pages, as well as provide a good URL they can bookmark and share.
      */
-    showSearchPage: false
+    showSearchPage: false,
+    searchResults: []
   }
 
   componentDidMount() {
@@ -29,14 +32,15 @@ class BooksApp extends React.Component {
     })
   }
 
-  handleChangeShelfEvent = (book, e) => {
+  handleShelfChangeEvent = (book, e) => {
     const fromShelf = book.shelf
     const toShelf = e.target.value
     if (fromShelf === toShelf)
       return
 
+    book.shelf = toShelf
+
     this.setState((prevState) => {
-      book.shelf = toShelf
       return {
         [fromShelf]: prevState[fromShelf].filter(b => b.id !== book.id),
         [toShelf]: prevState[toShelf].concat([book])
@@ -46,8 +50,14 @@ class BooksApp extends React.Component {
     BooksAPI.update(book, e.target.value)
   }
 
+  handleSearchResultsUpdate = (books) => {
+    this.setState({
+      searchResults: books
+    })
+  }
+
   render() {
-    console.log(this.state.displayingBooks)
+    console.log(this.state.searchResults)
     return (
       <div className="app">
         {this.state.showSearchPage ? (
@@ -55,16 +65,10 @@ class BooksApp extends React.Component {
             <div className="search-books-bar">
               <a className="close-search" onClick={() => this.setState({ showSearchPage: false })}>Close</a>
               <div className="search-books-input-wrapper">
-                {/*
-                  NOTES: The search from BooksAPI is limited to a particular set of search terms.
-                  You can find these search terms here:
-                  https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
-
-                  However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-                  you don't find a specific author or title. Every search is limited by search terms.
-                */}
-                <input type="text" placeholder="Search by title or author" />
-
+                <SearchBar onReturnSearchResults={this.handleSearchResultsUpdate} />
+                <div className="bookshelf-books">
+                  <BooksGrid books={this.state.searchResults} onChangeBookShelf={this.handleShelfChangeEvent} />
+                </div>
               </div>
             </div>
             <div className="search-books-results">
@@ -81,19 +85,19 @@ class BooksApp extends React.Component {
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Currently Reading</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.currentlyReading} onChangeBookShelf={this.handleChangeShelfEvent} />
+                      <BooksGrid books={this.state.currentlyReading} onChangeBookShelf={this.handleShelfChangeEvent} />
                     </div>
                   </div>
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Want to Read</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.wantToRead} onChangeBookShelf={this.handleChangeShelfEvent} />
+                      <BooksGrid books={this.state.wantToRead} onChangeBookShelf={this.handleShelfChangeEvent} />
                     </div>
                   </div>
                   <div className="bookshelf">
                     <h2 className="bookshelf-title">Read</h2>
                     <div className="bookshelf-books">
-                      <BooksGrid books={this.state.read} onChangeBookShelf={this.handleChangeShelfEvent} />
+                      <BooksGrid books={this.state.read} onChangeBookShelf={this.handleShelfChangeEvent} />
                     </div>
                   </div>
                 </div>

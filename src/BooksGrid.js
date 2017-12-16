@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 import PropTypes from "prop-types"
-import escapeRegExp from 'escape-string-regexp'
 
 
 class BooksGrid extends Component {
@@ -10,37 +9,16 @@ class BooksGrid extends Component {
         onChangeBookShelf: PropTypes.func.isRequired
     }
 
-    state = {
-        query: ''
-    }
-
-    updatequery = query => {
-        this.setState({ query: query.trim() })
-    }
-
-    clearquery = query => {
-        this.setState({ query: '' })
-    }
-
     render() {
         const { books, onChangeBookShelf } = this.props
-        const { query } = this.state
-
-        let showingBooks
-        if (query) {
-            const match = new RegExp(escapeRegExp(query), 'i')
-            showingBooks = books.filter(book => match.test(book.title))
-        } else {
-            showingBooks = books
-        }
 
         return (
             <ol className='books-grid'>
-                {showingBooks.map((book) => (
+                {books.map((book) => (
                     <li key={book.id} >
                         <div className="book">
                             <div className="book-top">
-                                <div className="book-cover" style={{ width: 128, height: 188, backgroundImage: `url(${book.imageLinks.thumbnail})` }}></div>
+                                <div className="book-cover" style={{ width: 128, height: 188, backgroundImage: `url(${book.imageLinks.smallThumbnail})` }}></div>
                                 <div className="book-shelf-changer">
                                     <select value={book.shelf} onChange={onChangeBookShelf.bind(this, book)}>
                                         <option value="none" disabled>Move to...</option>
