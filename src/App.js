@@ -52,7 +52,7 @@ class BooksApp extends React.Component {
         <Route path='/search' render={() => (
           <div className="search-books">
             <div className="search-books-bar">
-              <Link to="/" className="close-search" onClick={() => this.setState({ searchResults: [] })}>Close</Link>
+              <Link to="/" className="close-search">Close</Link>
               <div className="search-books-input-wrapper">
                 <SearchBar onReturnSearchResults={this.handleSearchResultsUpdate} />
               </div>

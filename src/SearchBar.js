@@ -17,6 +17,10 @@ class SearchBar extends Component {
     componentWillMount() {
         this.timer = null
     }
+    
+    componentWillUnmount() {
+        this.props.onReturnSearchResults(new Array(0))
+    }
 
     handleChange = (e) => {
         clearTimeout(this.timer)
